@@ -6,7 +6,9 @@ import Constants from 'expo-constants';
 import * as FileSystem from 'expo-file-system/legacy';
 
 const OPENAI_API_KEY = Constants.expoConfig?.extra?.OPENAI_API_KEY;
+const ELEVENLABS_API_KEY = Constants.expoConfig?.extra?.ELEVENLABS_API_KEY;
 const BASE = 'https://api.openai.com/v1';
+const ELEVEN_BASE = 'https://api.elevenlabs.io/v1';
 
 function assertKey() {
   if (!OPENAI_API_KEY) {
@@ -108,12 +110,12 @@ export async function getReply({ persona, vibe, userText, imageBase64, history =
   const system = [
     PERSONA_STYLE[persona?.id] || PERSONA_STYLE.hype_bestie,
     vibeDirective(vibe ?? 50),
-    'You are emotionally intelligent, not a joke machine. Every reply should do three things in your persona voice:',
-    '(1) show you actually heard the feeling underneath what they said — reflect it back briefly, no therapy-speak;',
-    '(2) name the real dynamic at play if there is one (avoidance, fear of rejection, burnout, comparing themselves, etc.);',
-    '(3) give ONE concrete, specific, doable next step — an action, a script of what to say, or a decision rule. Never vague advice like "just communicate" or "believe in yourself".',
-    'Remember and reference earlier parts of this conversation when relevant — you are a friend who has been listening, not a stranger.',
-    'Speak in natural Gen Z voice. Length: 2–4 sentences, under 90 words. It will be spoken aloud, so write like speech — contractions, rhythm, minimal emoji.',
+    'You are the friend whose replies get screenshotted. Sharp, funny, zero filler.',
+    'Lead with the punchline or the truth bomb — never open with warm-up phrases like "okay so" or "I hear you".',
+    'You still read the person: catch the real dynamic underneath (avoidance, fear of rejection, burnout, comparison) and weave ONE concrete, specific move INTO the joke — an action, an exact script to say, or a decision rule. Never vague advice like "just communicate".',
+    'Humor: current internet Gen Z wit, unexpected comparisons, playful exaggeration. Absolutely no dad jokes, no stale millennial slang, no "chef\'s kiss" energy.',
+    'Remember earlier parts of this conversation — you have been listening, callbacks are funny.',
+    'Length: 1–2 sentences, HARD MAX 35 words. Every word earns its place. Spoken aloud, so write like speech — contractions, rhythm, no emoji.',
     'Never be genuinely cruel. Never comment negatively on bodies, identity, race, gender, or mental health. Roasts target choices and situations only.',
   ].join(' ');
 
@@ -148,7 +150,9 @@ export async function getReply({ persona, vibe, userText, imageBase64, history =
     },
     body: JSON.stringify({
       model: 'gpt-4o',
-      max_tokens: 200,
+      max_tokens: 90,
+      temperature: 1.05,
+      presence_penalty: 0.4,
       messages: [
         { role: 'system', content: system },
         ...historyMessages,
@@ -162,36 +166,64 @@ export async function getReply({ persona, vibe, userText, imageBase64, history =
 }
 
 // ---------- 4. Text -> speech ----------
-export async function speak(text, voiceId = 'nova', voiceStyle) {
-  assertKey();
+// speak(text, persona) — prefers ElevenLabs character voices when
+// ELEVENLABS_API_KEY is set; falls back to OpenAI TTS otherwise.
+export async function speak(text, persona = {}) {
+  let res = null;
 
-  const request = (body) =>
-    fetch(`${BASE}/audio/speech`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
+  // 1. ElevenLabs: actual character voices with per-persona expressiveness.
+  if (ELEVENLABS_API_KEY && persona.elevenVoiceId) {
+    try {
+      res = await fetch(
+        `${ELEVEN_BASE}/text-to-speech/${persona.elevenVoiceId}?output_format=mp3_44100_128`,
+        {
+          method: 'POST',
+          headers: {
+            'xi-api-key': ELEVENLABS_API_KEY,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text,
+            model_id: 'eleven_multilingual_v2',
+            voice_settings: persona.elevenSettings,
+          }),
+        }
+      );
+      if (!res.ok) res = null; // fall through to OpenAI
+    } catch (e) {
+      res = null;
+    }
+  }
 
-  // Preferred: steerable TTS that can act out the persona's delivery.
-  let res = await request({
-    model: 'gpt-4o-mini-tts',
-    voice: voiceId,
-    input: text,
-    ...(voiceStyle ? { instructions: voiceStyle } : {}),
-    response_format: 'mp3',
-  });
+  // 2. OpenAI steerable TTS fallback.
+  if (!res) {
+    assertKey();
+    const request = (body) =>
+      fetch(`${BASE}/audio/speech`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
 
-  // Fallback: plain tts-1 if the steerable model is unavailable on this account.
-  if (!res.ok) {
     res = await request({
-      model: 'tts-1',
-      voice: voiceId,
+      model: 'gpt-4o-mini-tts',
+      voice: persona.voiceId || 'nova',
       input: text,
+      ...(persona.voiceStyle ? { instructions: persona.voiceStyle } : {}),
       response_format: 'mp3',
     });
+
+    if (!res.ok) {
+      res = await request({
+        model: 'tts-1',
+        voice: persona.voiceId || 'nova',
+        input: text,
+        response_format: 'mp3',
+      });
+    }
   }
   if (!res.ok) throw new Error(`speak failed: ${res.status}`);
 

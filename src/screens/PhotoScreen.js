@@ -48,7 +48,7 @@ export default function PhotoScreen() {
         });
         setReply(text);
         try {
-          const uri = await speak(text, persona.voiceId, persona.voiceStyle);
+          const uri = await speak(text, persona);
           setAudioUri(uri);
           await playAudio(uri);
         } catch (e) {

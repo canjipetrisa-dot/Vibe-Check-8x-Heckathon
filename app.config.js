@@ -28,6 +28,7 @@ export default {
     extra: {
       OPENAI_API_KEY: process.env.OPENAI_API_KEY,
       POSTHOG_KEY: process.env.POSTHOG_KEY,
+      ELEVENLABS_API_KEY: process.env.ELEVENLABS_API_KEY,
     },
   },
 };

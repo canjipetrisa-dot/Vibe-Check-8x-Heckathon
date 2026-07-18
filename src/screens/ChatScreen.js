@@ -105,7 +105,7 @@ export default function ChatScreen() {
 
       // 4. speak + autoplay
       try {
-        const uri = await speak(replyText, persona.voiceId, persona.voiceStyle);
+        const uri = await speak(replyText, persona);
         updateMessage(msgId, { audioUri: uri });
         await playAudio(uri);
       } catch (e) {
