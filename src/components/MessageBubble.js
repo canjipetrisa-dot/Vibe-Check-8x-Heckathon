@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ThinkingDots from './ThinkingDots';
 import CrisisCard from './CrisisCard';
@@ -15,18 +15,21 @@ export default function MessageBubble({ message, onReplay }) {
   return (
     <View style={[styles.row, isUser ? styles.rowUser : styles.rowAi]}>
       <View style={[styles.bubble, isUser ? styles.userBubble : styles.aiBubble]}>
+        {message.imageUri ? (
+          <Image source={{ uri: message.imageUri }} style={styles.image} />
+        ) : null}
         {message.thinking ? (
           <ThinkingDots />
-        ) : (
+        ) : message.text ? (
           <Text style={styles.text}>{message.text}</Text>
-        )}
+        ) : null}
         {!isUser && !message.thinking && message.audioUri ? (
           <Pressable
             onPress={() => onReplay?.(message)}
-            hitSlop={10}
+            hitSlop={12}
             style={styles.speaker}
           >
-            <Ionicons name="volume-medium-outline" size={17} color={COLORS.textDim} />
+            <Ionicons name="volume-medium-outline" size={19} color={COLORS.textDim} />
           </Pressable>
         ) : null}
       </View>
@@ -37,35 +40,39 @@ export default function MessageBubble({ message, onReplay }) {
 const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
-    marginVertical: 5,
-    paddingHorizontal: 16,
+    marginVertical: 7,
+    paddingHorizontal: 20,
   },
   rowUser: { justifyContent: 'flex-end' },
   rowAi: { justifyContent: 'flex-start' },
   bubble: {
-    maxWidth: '80%',
-    borderRadius: 22,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    maxWidth: '82%',
+    borderRadius: 24,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
   },
   userBubble: {
     backgroundColor: COLORS.userBubble,
-    borderBottomRightRadius: 6,
+    borderBottomRightRadius: 8,
   },
   aiBubble: {
     backgroundColor: COLORS.aiBubble,
-    borderBottomLeftRadius: 6,
+    borderBottomLeftRadius: 8,
+  },
+  image: {
+    width: 190,
+    height: 190,
+    borderRadius: 18,
+    marginBottom: 6,
+    backgroundColor: COLORS.card,
   },
   text: {
     color: COLORS.text,
-    fontSize: 16,
-    lineHeight: 22,
+    fontSize: 17,
+    lineHeight: 25,
   },
   speaker: {
     alignSelf: 'flex-end',
-    marginTop: 6,
-  },
-  speakerIcon: {
-    fontSize: 16,
+    marginTop: 8,
   },
 });

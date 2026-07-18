@@ -42,6 +42,10 @@ export function VibeProvider({ children }) {
     setMessages((prev) => prev.filter((m) => m.id !== id));
   }, []);
 
+  const clearMessages = useCallback(() => {
+    setMessages([]);
+  }, []);
+
   return (
     <VibeContext.Provider
       value={{
@@ -54,6 +58,7 @@ export function VibeProvider({ children }) {
         addMessage,
         updateMessage,
         removeMessage,
+        clearMessages,
       }}
     >
       {children}
