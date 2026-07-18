@@ -234,11 +234,20 @@ export default function MainScreen() {
       <View style={styles.blobViolet} pointerEvents="none" />
       <View style={styles.blobTeal} pointerEvents="none" />
 
-      <LogoHeader width={inConvo ? 100 : 210} />
+      <LogoHeader width={inConvo ? 100 : 160} />
 
       {!inConvo ? (
-        <ScrollView contentContainerStyle={styles.landing}>
-          <Text style={styles.subtitle}>Who's giving you advice today?</Text>
+        <ScrollView contentContainerStyle={styles.landing} bounces={false}>
+          <View style={styles.steps}>
+            {['Pick a persona', 'Set the vibe', 'Hold the mic'].map((t, i) => (
+              <View key={t} style={styles.step}>
+                <View style={styles.stepNum}>
+                  <Text style={styles.stepNumText}>{i + 1}</Text>
+                </View>
+                <Text style={styles.stepText}>{t}</Text>
+              </View>
+            ))}
+          </View>
           <View style={styles.grid}>
             {PERSONAS.map((p) => (
               <PersonaCard
@@ -249,9 +258,6 @@ export default function MainScreen() {
               />
             ))}
           </View>
-          <Text style={styles.hint}>
-            Hold the mic to talk, or tap the photo icon to show something.
-          </Text>
         </ScrollView>
       ) : (
         <FlatList
@@ -352,29 +358,43 @@ const styles = StyleSheet.create({
   },
   landing: {
     paddingHorizontal: 24,
-    paddingTop: 8,
-    paddingBottom: 28,
-    flexGrow: 1,
+    paddingTop: 4,
+    paddingBottom: 12,
+  },
+  steps: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 18,
+    paddingHorizontal: 4,
+  },
+  step: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  stepNum: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(139, 124, 246, 0.22)',
+    alignItems: 'center',
     justifyContent: 'center',
   },
-  subtitle: {
+  stepNumText: {
+    color: COLORS.accent,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  stepText: {
     color: COLORS.textMid,
-    fontSize: 18,
+    fontSize: 12.5,
+    fontWeight: '600',
+    marginTop: 6,
     textAlign: 'center',
-    marginBottom: 30,
-    lineHeight: 26,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-  },
-  hint: {
-    color: COLORS.textDim,
-    fontSize: 14.5,
-    textAlign: 'center',
-    marginTop: 14,
-    lineHeight: 21,
   },
   list: {
     paddingVertical: 12,

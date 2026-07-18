@@ -67,7 +67,7 @@ export default function PersonaCard({ persona, selected, onPress }) {
 const styles = StyleSheet.create({
   pressable: {
     width: '47.5%',
-    marginBottom: 18,
+    marginBottom: 14,
   },
   border: {
     borderRadius: 30,
@@ -79,10 +79,10 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 27.5,
     backgroundColor: COLORS.card,
-    paddingVertical: 32,
+    paddingVertical: 22,
     paddingHorizontal: 14,
     alignItems: 'center',
-    minHeight: 190,
+    minHeight: 164,
   },
   cardSelected: {
     backgroundColor: COLORS.cardSelected,
@@ -98,15 +98,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   emojiWrap: {
-    width: 66,
-    height: 66,
-    borderRadius: 33,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   emoji: {
-    fontSize: 34,
+    fontSize: 29,
   },
   name: {
     color: COLORS.text,
