@@ -48,11 +48,11 @@ export default function PhotoScreen() {
         });
         setReply(text);
         try {
-          const uri = await speak(text, persona.voiceId);
+          const uri = await speak(text, persona.voiceId, persona.voiceStyle);
           setAudioUri(uri);
           await playAudio(uri);
         } catch (e) {
-          // audio best-effort
+          console.warn('audio failed:', e);
         }
       } catch (e) {
         setReply(`something broke 💀 (${e.message})`);

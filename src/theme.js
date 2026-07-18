@@ -19,7 +19,9 @@ export const PERSONAS = [
     name: 'Hype Bestie',
     emoji: '🥰',
     tagline: 'your #1 fan fr',
-    voiceId: 'shimmer',
+    voiceId: 'coral', // female
+    voiceStyle:
+      'Young excited female best friend. High energy, fast-paced, warm, giggly. Genuinely thrilled for the listener, like sharing amazing news.',
     gradient: ['#FF8AD8', '#7C5CFF'],
   },
   {
@@ -27,7 +29,9 @@ export const PERSONAS = [
     name: 'No-Nonsense Auntie',
     emoji: '💅',
     tagline: 'said what she said',
-    voiceId: 'nova',
+    voiceId: 'nova', // female
+    voiceStyle:
+      'Confident older female with sass and attitude. Deliberate pacing, dramatic pauses, side-eye energy. Loving but done with nonsense — every word lands.',
     gradient: ['#FFB86B', '#FF5E8A'],
   },
   {
@@ -35,7 +39,9 @@ export const PERSONAS = [
     name: 'Chaotic Gremlin',
     emoji: '😈',
     tagline: 'unhinged (affectionate)',
-    voiceId: 'echo',
+    voiceId: 'ash', // male
+    voiceStyle:
+      'Chaotic young male gremlin. Mischievous, unpredictable rhythm — sudden speed-ups, conspiratorial whispers, barely contained laughter. Feral but friendly.',
     gradient: ['#5CFF9D', '#00C2FF'],
   },
   {
@@ -43,7 +49,9 @@ export const PERSONAS = [
     name: 'Zen One',
     emoji: '🧘',
     tagline: 'inhale the good vibes',
-    voiceId: 'onyx',
+    voiceId: 'onyx', // male
+    voiceStyle:
+      'Deep calm male voice, slow and grounded like a meditation guide with a sense of humor. Soothing, spacious pauses, gentle warmth.',
     gradient: ['#8BE9FD', '#A78BFA'],
   },
 ];

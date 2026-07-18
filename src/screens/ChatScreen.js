@@ -97,19 +97,20 @@ export default function ChatScreen() {
         return;
       }
 
-      // 3. persona reply
-      const replyText = await getReply({ persona, vibe, userText });
+      // 3. persona reply (with conversation history for continuity)
+      const replyText = await getReply({ persona, vibe, userText, history: messages });
       removeMessage(thinkingId);
       thinkingId = null;
       const msgId = addMessage({ role: 'ai', text: replyText });
 
       // 4. speak + autoplay
       try {
-        const uri = await speak(replyText, persona.voiceId);
+        const uri = await speak(replyText, persona.voiceId, persona.voiceStyle);
         updateMessage(msgId, { audioUri: uri });
         await playAudio(uri);
       } catch (e) {
-        // text already shown; audio is best-effort
+        console.warn('audio failed:', e);
+        addMessage({ role: 'ai', text: `🔇 audio failed: ${e.message}` });
       }
     } catch (e) {
       if (thinkingId) removeMessage(thinkingId);
@@ -117,7 +118,7 @@ export default function ChatScreen() {
     } finally {
       setBusy(false);
     }
-  }, [recording, persona, vibe, addMessage, updateMessage, removeMessage]);
+  }, [recording, persona, vibe, messages, addMessage, updateMessage, removeMessage]);
 
   const onReplay = useCallback((message) => {
     if (message.audioUri) playAudio(message.audioUri);

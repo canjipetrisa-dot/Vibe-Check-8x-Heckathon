@@ -1,7 +1,9 @@
 // api.js — transcribe / checkCrisis / getReply / speak
 // Keys come from Expo config (app.config.js -> extra). Never hardcoded.
 import Constants from 'expo-constants';
-import * as FileSystem from 'expo-file-system';
+// v19 moved this API to /legacy — the main entry no longer exports
+// cacheDirectory / writeAsStringAsync, which broke TTS silently.
+import * as FileSystem from 'expo-file-system/legacy';
 
 const OPENAI_API_KEY = Constants.expoConfig?.extra?.OPENAI_API_KEY;
 const BASE = 'https://api.openai.com/v1';
@@ -99,16 +101,30 @@ const PERSONA_STYLE = {
     'You are Zen One 🧘 — calm, grounded, a little cosmic. Chill wisdom with a wink.',
 };
 
-export async function getReply({ persona, vibe, userText, imageBase64 }) {
+// history: array of prior chat messages [{role: 'user'|'ai', text}] for continuity.
+export async function getReply({ persona, vibe, userText, imageBase64, history = [] }) {
   assertKey();
 
   const system = [
     PERSONA_STYLE[persona?.id] || PERSONA_STYLE.hype_bestie,
     vibeDirective(vibe ?? 50),
-    'Speak in Gen Z voice. Keep the reply SHORT: 1–3 sentences, under 50 words.',
-    'Never be genuinely cruel. Never comment negatively on bodies, identity, race, gender, or mental health.',
-    'The reply will be spoken aloud — write it like natural speech, minimal emoji.',
+    'You are emotionally intelligent, not a joke machine. Every reply should do three things in your persona voice:',
+    '(1) show you actually heard the feeling underneath what they said — reflect it back briefly, no therapy-speak;',
+    '(2) name the real dynamic at play if there is one (avoidance, fear of rejection, burnout, comparing themselves, etc.);',
+    '(3) give ONE concrete, specific, doable next step — an action, a script of what to say, or a decision rule. Never vague advice like "just communicate" or "believe in yourself".',
+    'Remember and reference earlier parts of this conversation when relevant — you are a friend who has been listening, not a stranger.',
+    'Speak in natural Gen Z voice. Length: 2–4 sentences, under 90 words. It will be spoken aloud, so write like speech — contractions, rhythm, minimal emoji.',
+    'Never be genuinely cruel. Never comment negatively on bodies, identity, race, gender, or mental health. Roasts target choices and situations only.',
   ].join(' ');
+
+  // Map prior chat into OpenAI roles, skipping crisis cards / thinking bubbles.
+  const historyMessages = history
+    .filter((m) => (m.role === 'user' || m.role === 'ai') && m.text)
+    .slice(-10)
+    .map((m) => ({
+      role: m.role === 'user' ? 'user' : 'assistant',
+      content: m.text,
+    }));
 
   const userContent = [];
   if (userText) userContent.push({ type: 'text', text: userText });
@@ -131,10 +147,11 @@ export async function getReply({ persona, vibe, userText, imageBase64 }) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      max_tokens: 120,
+      model: 'gpt-4o',
+      max_tokens: 200,
       messages: [
         { role: 'system', content: system },
+        ...historyMessages,
         { role: 'user', content: userContent },
       ],
     }),
@@ -145,21 +162,37 @@ export async function getReply({ persona, vibe, userText, imageBase64 }) {
 }
 
 // ---------- 4. Text -> speech ----------
-export async function speak(text, voiceId = 'nova') {
+export async function speak(text, voiceId = 'nova', voiceStyle) {
   assertKey();
-  const res = await fetch(`${BASE}/audio/speech`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
+
+  const request = (body) =>
+    fetch(`${BASE}/audio/speech`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+
+  // Preferred: steerable TTS that can act out the persona's delivery.
+  let res = await request({
+    model: 'gpt-4o-mini-tts',
+    voice: voiceId,
+    input: text,
+    ...(voiceStyle ? { instructions: voiceStyle } : {}),
+    response_format: 'mp3',
+  });
+
+  // Fallback: plain tts-1 if the steerable model is unavailable on this account.
+  if (!res.ok) {
+    res = await request({
       model: 'tts-1',
       voice: voiceId,
       input: text,
       response_format: 'mp3',
-    }),
-  });
+    });
+  }
   if (!res.ok) throw new Error(`speak failed: ${res.status}`);
 
   // RN fetch: blob -> base64 -> local file for expo-av.
