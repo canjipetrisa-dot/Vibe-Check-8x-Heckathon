@@ -46,7 +46,7 @@ Keys are read via `app.config.js` → `extra`. Nothing is hardcoded. **Note:** i
 ## File structure
 
 ```
-├── App.js                      # Tabs, welcome screen, persistent vibe slider
+├── App.js                      # Root: welcome overlay + main screen
 ├── index.js                    # Entry point
 ├── app.config.js               # Expo config; reads keys from .env
 ├── assets/logo.png             # Vibey wordmark
@@ -56,9 +56,11 @@ Keys are read via `app.config.js` → `extra`. Nothing is hardcoded. **Note:** i
     ├── analytics.js            # PostHog events
     ├── theme.js                # Colors, personas, voices, vibe bands
     ├── context/VibeContext.js  # Global state: persona, vibe, chat history
-    ├── components/             # VibeSlider, PersonaCard, WelcomeScreen, LogoHeader,
-    │                           # MessageBubble, ThinkingDots, CrisisCard
-    └── screens/                # Home (persona grid), Chat (voice loop), Photo
+    ├── components/             # VibeSlider (haptic), PersonaCard, PersonaChips,
+    │                           # WelcomeScreen, LogoHeader, MessageBubble,
+    │                           # ThinkingDots, CrisisCard
+    └── screens/MainScreen.js   # Single-page app: landing grid collapses into
+                                # chat + persona chips + docked slider/mic/photo
 ```
 
 ## How the voice loop works
