@@ -14,7 +14,7 @@ export default function VibeSlider() {
       <Text style={styles.label}>{vibeLabel(vibe)}</Text>
       <View style={styles.trackArea}>
         <LinearGradient
-          colors={[COLORS.hypeBlue, '#B473FF', COLORS.roastRed]}
+          colors={[COLORS.hypeBlue, COLORS.accent, COLORS.roastRed]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={styles.gradientTrack}
@@ -51,10 +51,11 @@ const styles = StyleSheet.create({
   },
   label: {
     color: COLORS.text,
-    fontSize: 18,
-    fontWeight: '800',
+    fontSize: 16,
+    fontWeight: '700',
     textAlign: 'center',
     marginBottom: 4,
+    letterSpacing: 0.3,
   },
   trackArea: {
     height: 40,

@@ -9,8 +9,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 
 import MessageBubble from '../components/MessageBubble';
+import LogoHeader from '../components/LogoHeader';
 import { useVibe } from '../context/VibeContext';
 import { COLORS } from '../theme';
 import { track } from '../analytics';
@@ -59,7 +61,7 @@ export default function ChatScreen() {
       const rec = await startRecording();
       setRecording(rec);
     } catch (e) {
-      addMessage({ role: 'ai', text: 'mic said no 😔 check permissions?' });
+      addMessage({ role: 'ai', text: 'Mic permission needed — enable it in Settings.' });
     }
   }, [busy, recording, addMessage]);
 
@@ -81,7 +83,7 @@ export default function ChatScreen() {
       thinkingId = null;
 
       if (!userText) {
-        addMessage({ role: 'ai', text: "i heard... nothing? say it again bestie" });
+        addMessage({ role: 'ai', text: 'Heard nothing — try that again.' });
         return;
       }
       addMessage({ role: 'user', text: userText });
@@ -110,11 +112,11 @@ export default function ChatScreen() {
         await playAudio(uri);
       } catch (e) {
         console.warn('audio failed:', e);
-        addMessage({ role: 'ai', text: `🔇 audio failed: ${e.message}` });
+        addMessage({ role: 'ai', text: `Audio failed: ${e.message}` });
       }
     } catch (e) {
       if (thinkingId) removeMessage(thinkingId);
-      addMessage({ role: 'ai', text: `something broke 💀 (${e.message})` });
+      addMessage({ role: 'ai', text: `Something broke (${e.message})` });
     } finally {
       setBusy(false);
     }
@@ -126,9 +128,11 @@ export default function ChatScreen() {
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <Text style={styles.header}>
-        {persona.emoji} {persona.name}
-      </Text>
+      <LogoHeader width={96} />
+      <View style={styles.headerRow}>
+        <LinearGradient colors={persona.gradient} style={styles.headerDot} />
+        <Text style={styles.header}>{persona.name}</Text>
+      </View>
       <FlatList
         ref={listRef}
         data={messages}
@@ -139,7 +143,7 @@ export default function ChatScreen() {
         contentContainerStyle={styles.list}
         ListEmptyComponent={
           <Text style={styles.empty}>
-            hold the mic and say what's on your mind 🎙️
+            Hold the mic and say what's on your mind.
           </Text>
         }
       />
@@ -153,21 +157,21 @@ export default function ChatScreen() {
             <LinearGradient
               colors={
                 recording
-                  ? [COLORS.roastRed, '#FF7A5C']
-                  : [COLORS.userBubble, COLORS.hypeBlue]
+                  ? [COLORS.roastRed, '#F0705E']
+                  : ['#4F46E5', '#8B5CF6']
               }
               style={[styles.micButton, busy && styles.micBusy]}
             >
-              <Text style={styles.micIcon}>🎙️</Text>
+              <Ionicons name="mic" size={34} color="#FFFFFF" />
             </LinearGradient>
           </Pressable>
         </Animated.View>
         <Text style={styles.micHint}>
           {recording
-            ? 'listening... release to send'
+            ? 'Listening — release to send'
             : busy
-            ? 'hold on...'
-            : 'hold to talk'}
+            ? 'One sec...'
+            : 'Hold to talk'}
         </Text>
       </View>
     </SafeAreaView>
@@ -179,12 +183,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.bg,
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 2,
+    paddingBottom: 10,
+  },
+  headerDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 8,
+  },
   header: {
     color: COLORS.text,
-    fontSize: 18,
-    fontWeight: '800',
-    textAlign: 'center',
-    paddingVertical: 10,
+    fontSize: 17,
+    fontWeight: '700',
+    letterSpacing: 0.2,
   },
   list: {
     paddingVertical: 8,
@@ -211,9 +227,6 @@ const styles = StyleSheet.create({
   },
   micBusy: {
     opacity: 0.5,
-  },
-  micIcon: {
-    fontSize: 36,
   },
   micHint: {
     color: COLORS.textDim,

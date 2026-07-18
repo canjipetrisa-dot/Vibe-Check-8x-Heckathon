@@ -10,9 +10,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
 import ThinkingDots from '../components/ThinkingDots';
+import LogoHeader from '../components/LogoHeader';
 import { useVibe } from '../context/VibeContext';
 import { COLORS } from '../theme';
 import { track } from '../analytics';
@@ -55,7 +57,7 @@ export default function PhotoScreen() {
           console.warn('audio failed:', e);
         }
       } catch (e) {
-        setReply(`something broke 💀 (${e.message})`);
+        setReply(`Something broke (${e.message})`);
       } finally {
         setBusy(false);
       }
@@ -80,35 +82,38 @@ export default function PhotoScreen() {
           await handleImage(result.assets[0]);
         }
       } catch (e) {
-        Alert.alert('oop', e.message);
+        Alert.alert('Something went wrong', e.message);
       }
     },
     [handleImage]
   );
 
   const openPicker = useCallback(() => {
-    Alert.alert('show me something 📸', 'where from?', [
-      { text: '📷 camera', onPress: () => pickFrom('camera') },
-      { text: '🖼️ library', onPress: () => pickFrom('library') },
-      { text: 'cancel', style: 'cancel' },
+    Alert.alert('Show me something', 'Where from?', [
+      { text: 'Camera', onPress: () => pickFrom('camera') },
+      { text: 'Library', onPress: () => pickFrom('library') },
+      { text: 'Cancel', style: 'cancel' },
     ]);
   }, [pickFrom]);
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Text style={styles.header}>
-          {persona.emoji} {persona.name} will react
-        </Text>
+        <LogoHeader width={96} />
+        <View style={styles.headerRow}>
+          <LinearGradient colors={persona.gradient} style={styles.headerDot} />
+          <Text style={styles.header}>{persona.name} will react</Text>
+        </View>
 
         <Pressable onPress={openPicker} disabled={busy}>
           <LinearGradient
-            colors={[COLORS.userBubble, COLORS.roastRed]}
+            colors={['#4F46E5', '#8B5CF6']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={[styles.bigButton, busy && { opacity: 0.5 }]}
           >
-            <Text style={styles.bigButtonText}>show me something 📸</Text>
+            <Ionicons name="camera-outline" size={22} color="#FFFFFF" style={{ marginRight: 10 }} />
+            <Text style={styles.bigButtonText}>Show me something</Text>
           </LinearGradient>
         </Pressable>
 
@@ -131,7 +136,7 @@ export default function PhotoScreen() {
                 hitSlop={10}
                 style={styles.speaker}
               >
-                <Text style={{ fontSize: 18 }}>🔊</Text>
+                <Ionicons name="volume-medium-outline" size={18} color={COLORS.textDim} />
               </Pressable>
             ) : null}
           </View>
@@ -150,27 +155,41 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 32,
   },
-  header: {
-    color: COLORS.text,
-    fontSize: 18,
-    fontWeight: '800',
-    textAlign: 'center',
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 18,
   },
+  headerDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 8,
+  },
+  header: {
+    color: COLORS.text,
+    fontSize: 17,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
   bigButton: {
-    borderRadius: 28,
-    paddingVertical: 26,
+    borderRadius: 32,
+    paddingVertical: 24,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   bigButtonText: {
     color: '#FFFFFF',
-    fontSize: 20,
-    fontWeight: '900',
+    fontSize: 18,
+    fontWeight: '700',
+    letterSpacing: 0.2,
   },
   photo: {
     width: '100%',
     height: 300,
-    borderRadius: 24,
+    borderRadius: 28,
     marginTop: 20,
     backgroundColor: COLORS.card,
   },

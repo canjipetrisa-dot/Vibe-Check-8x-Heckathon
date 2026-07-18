@@ -1,5 +1,6 @@
-import React from 'react';
-import { View, Text } from 'react-native';
+import React, { useState } from 'react';
+import { View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import {
@@ -10,6 +11,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { VibeProvider } from './src/context/VibeContext';
 import VibeSlider from './src/components/VibeSlider';
+import WelcomeScreen from './src/components/WelcomeScreen';
 import HomeScreen from './src/screens/HomeScreen';
 import ChatScreen from './src/screens/ChatScreen';
 import PhotoScreen from './src/screens/PhotoScreen';
@@ -28,9 +30,9 @@ const navTheme = {
   },
 };
 
-function TabIcon({ label, focused }) {
+function TabIcon({ name, focused, color }) {
   return (
-    <Text style={{ fontSize: 22, opacity: focused ? 1 : 0.45 }}>{label}</Text>
+    <Ionicons name={focused ? name : `${name}-outline`} size={33} color={color} />
   );
 }
 
@@ -46,9 +48,12 @@ function TabBarWithSlider(props) {
 }
 
 export default function App() {
+  const [entered, setEntered] = useState(false);
+
   return (
     <SafeAreaProvider>
       <VibeProvider>
+        <View style={{ flex: 1 }}>
         <NavigationContainer theme={navTheme}>
           <StatusBar style="light" />
           <Tab.Navigator
@@ -58,20 +63,20 @@ export default function App() {
               tabBarStyle: {
                 backgroundColor: COLORS.card,
                 borderTopWidth: 0,
-                height: 62,
-                paddingTop: 6,
+                height: 78,
+                paddingTop: 10,
               },
-              tabBarActiveTintColor: COLORS.accent,
+              tabBarActiveTintColor: COLORS.text,
               tabBarInactiveTintColor: COLORS.textDim,
-              tabBarLabelStyle: { fontSize: 11, fontWeight: '700' },
+              tabBarLabelStyle: { fontSize: 12, fontWeight: '600', letterSpacing: 0.3 },
             }}
           >
             <Tab.Screen
               name="Home"
               component={HomeScreen}
               options={{
-                tabBarIcon: ({ focused }) => (
-                  <TabIcon label="✨" focused={focused} />
+                tabBarIcon: ({ focused, color }) => (
+                  <TabIcon name="people" focused={focused} color={color} />
                 ),
               }}
             />
@@ -79,8 +84,8 @@ export default function App() {
               name="Chat"
               component={ChatScreen}
               options={{
-                tabBarIcon: ({ focused }) => (
-                  <TabIcon label="🎙️" focused={focused} />
+                tabBarIcon: ({ focused, color }) => (
+                  <TabIcon name="mic" focused={focused} color={color} />
                 ),
               }}
             />
@@ -88,13 +93,15 @@ export default function App() {
               name="Photo"
               component={PhotoScreen}
               options={{
-                tabBarIcon: ({ focused }) => (
-                  <TabIcon label="📸" focused={focused} />
+                tabBarIcon: ({ focused, color }) => (
+                  <TabIcon name="camera" focused={focused} color={color} />
                 ),
               }}
             />
           </Tab.Navigator>
         </NavigationContainer>
+        {!entered && <WelcomeScreen onDone={() => setEntered(true)} />}
+        </View>
       </VibeProvider>
     </SafeAreaProvider>
   );

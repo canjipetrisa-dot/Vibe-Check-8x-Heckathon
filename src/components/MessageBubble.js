@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import ThinkingDots from './ThinkingDots';
 import CrisisCard from './CrisisCard';
 import { COLORS } from '../theme';
@@ -25,7 +26,7 @@ export default function MessageBubble({ message, onReplay }) {
             hitSlop={10}
             style={styles.speaker}
           >
-            <Text style={styles.speakerIcon}>🔊</Text>
+            <Ionicons name="volume-medium-outline" size={17} color={COLORS.textDim} />
           </Pressable>
         ) : null}
       </View>

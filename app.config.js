@@ -2,7 +2,7 @@
 // Run:  OPENAI_API_KEY=sk-... POSTHOG_KEY=phc_... npx expo start
 export default {
   expo: {
-    name: 'Vibe Check',
+    name: 'Vibey',
     slug: 'vibe-check',
     version: '1.0.0',
     orientation: 'portrait',
